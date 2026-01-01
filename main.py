@@ -5,10 +5,17 @@ from colorama import Fore, Style, init
 import time
 import sys
 import json
+import hashlib
+import uuid
 
 init(autoreset=True)
 
+# This gives you a unique ID for the user's computer
+HARDWARE_ID = str(uuid.getnode()) 
+SECRET_KEY = f"PyCasino_{HARDWARE_ID}"
+
 global cash
+cash = 100
 
 def main_menu():
     print("█▀█ █▄█ █▀▀ ▄▀█ █▀ █ █▄ █ █▀█\n█▀▀  █  █▄▄ █▀█ ▄█ █ █ ▀█ █▄█")
@@ -34,11 +41,27 @@ def main_menu():
         clear_screen()
         try:
             with open("savedata.json", "r") as f:
-                data = json.load(f)
-                cash = data.get("cash", 100)
-                print(f"Game loaded! You have ${cash} available.")
-                input("Press Enter to continue...")
-                clear_screen()
+                try:
+                    data = json.load(f)
+                    cash = data.get("cash", 100)
+                    data_string = f"{cash}-{SECRET_KEY}"
+                    hash_check = hashlib.sha256(data_string.encode()).hexdigest()
+                    if hash_check != data.get("hash"):
+                        print("Save file integrity check failed! Starting a new game.")
+                        cash = 100
+                        save_game()
+                        input("Press Enter to continue...")
+                        clear_screen()
+                    else:
+                        print(f"Game loaded! You have ${cash} available.")
+                        input("Press Enter to continue...")
+                        clear_screen()
+                except json.JSONDecodeError:
+                    print("Save file is corrupted or unreadable! Starting a new game.")
+                    cash = 100
+                    save_game()
+                    input("Press Enter to continue...")
+                    clear_screen()
         except FileNotFoundError:
             print("No save file found. Starting a new game.")
             cash = 100
@@ -58,7 +81,14 @@ def clear_screen():
 
 def save_game():
     global cash
-    data = {"cash": cash}
+    # Create the fingerprint
+    data_string = f"{cash}-{SECRET_KEY}"
+    file_hash = hashlib.sha256(data_string.encode()).hexdigest()
+    
+    data = {
+        "cash": cash,
+        "hash": file_hash
+    }
     with open("savedata.json", "w") as f:
         json.dump(data, f)
     print(Fore.GREEN + "Game Saved!")
