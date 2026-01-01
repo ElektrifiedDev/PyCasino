@@ -8,33 +8,78 @@ import json
 
 init(autoreset=True)
 
+global cash
+
 def main_menu():
     print("█▀█ █▄█ █▀▀ ▄▀█ █▀ █ █▄ █ █▀█\n█▀▀  █  █▄▄ █▀█ ▄█ █ █ ▀█ █▄█")
     input("Press Enter to continue...")
     clear_screen()
-    return welcome()
+
+    print("Main Menu")
+    print("1. Start New Game\n2. Load Game\n3. Exit")
+    userchoice = input("\nPlease enter the number corresponding to your choice:   ")
+
+    global cash
+
+    if userchoice == "1":
+        clear_screen()
+        cash = 100
+        save_game()
+        print(f"New game started! You have ${cash} available.")
+        input("Press Enter to continue...")
+        clear_screen()
+        return welcome()
+
+    if userchoice == "2":
+        clear_screen()
+        try:
+            with open("savedata.json", "r") as f:
+                data = json.load(f)
+                cash = data.get("cash", 100)
+                print(f"Game loaded! You have ${cash} available.")
+                input("Press Enter to continue...")
+                clear_screen()
+        except FileNotFoundError:
+            print("No save file found. Starting a new game.")
+            cash = 100
+            save_game()
+            input("Press Enter to continue...")
+            clear_screen()
+        return welcome()
+
+    if userchoice == "3":
+        clear_screen()
+        print("Thanks for playing!")
+        input("Press Enter to exit...")
+        sys.exit()
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def welcome():
+def save_game():
     global cash
-    cash = 100
+    data = {"cash": cash}
+    with open("savedata.json", "w") as f:
+        json.dump(data, f)
+    print(Fore.GREEN + "Game Saved!")
+    return
+
+def welcome():
     print(Fore.WHITE + "Welcome to the Casino!" + Style.RESET_ALL)
     print(Fore.LIGHTBLACK_EX + "We have a number of games available, where you can gamble!" + Style.RESET_ALL)
-    input()
+    input("Press Enter to continue...")
     clear_screen()
     return game_select()
 
 def game_select():
     while True:
         print(f"Here is a list of games available:\n{Fore.LIGHTBLACK_EX + "\n1. Coin Flipping\n2. Dice" + Style.RESET_ALL}")
-        userchoice = input("\nPlease enter the number corresponding to your game of choice:   ")
+        userchoice = input("\nPlease enter the number corresponding to your game of choice, or Q to quit:   ")
 
         if userchoice == "1":
             clear_screen()
             print(f"Welcome to the {Fore.BLUE + "Coinflip" + Style.RESET_ALL} game. \nIn this game, you bet money on either Heads or Tails. If you win, you earn double of what you had bet. If you lose, you lose the money you had bet.")
-            input()
+            input("Press Enter to continue...")
             clear_screen()
             return game_coinflip()
         elif userchoice == "2":
@@ -43,12 +88,16 @@ def game_select():
             print(f"If you roll {Fore.CYAN + "two 6's" + Style.RESET_ALL}, you hit the jackpot and your bet gets multiplied by {Fore.YELLOW + "5x" + Style.RESET_ALL}.")
             print(f"If you roll for a {Fore.CYAN + "a total of 10 or 11" + Style.RESET_ALL}, your bet gets multipled by {Fore.YELLOW + "3x" + Style.RESET_ALL}.")
             print(f"If you roll for a {Fore.CYAN + "a total of 7, 8 or 9" + Style.RESET_ALL}, your bet gets multiplied by {Fore.YELLOW + "2x" + Style.RESET_ALL}.")
-            input()
+            input("Press Enter to continue...")
             clear_screen()
             return game_dice()
+        elif userchoice.lower() == "q":
+            save_game()
+            clear_screen()
+            sys.exit()
         else:
             print("That isn't a valid option!")
-            input()
+            input("Press Enter to continue...")
             clear_screen()
             continue
     
@@ -59,6 +108,7 @@ def bankrupt():
     return main_menu()
 
 def game_coinflip():
+    global cash
     try:
         bet = float(input(f"You have ${cash} available. Enter your bet:   "))
     except ValueError:
@@ -93,6 +143,7 @@ def game_coinflip():
         print(f"You won! You earned ${bet} and now have ${cash}.")
     else:
         print(f"You lost ${bet}. You now have ${cash}.")
+    save_game()
 
     if cash <= 0:
         return bankrupt()
@@ -106,22 +157,23 @@ def game_coinflip():
         return game_select()
     
 def game_dice():
+    global cash
     try:
         bet = float(input(f"You have ${cash} available. Enter your bet:   "))
     except ValueError:
         print("Please enter a valid number.")
-        input()
+        input("Press Enter to continue...")
         clear_screen()
         return game_dice()
 
     if bet > cash:
         print(f"You can't bet more than you have! Your maximum bet is {cash}")
-        input()
+        input("Press Enter to continue...")
         clear_screen()
         return game_dice()
     elif bet <= 0:
         print("You cannot make a bet of 0 or less!")
-        input()
+        input("Press Enter to continue...")
         clear_screen()
         return game_dice()
 
@@ -157,6 +209,7 @@ def game_dice():
 
     cash += bet
     print(f"\nYou earnt ${bet}.Your balance is now ${cash}!")
+    save_game()
 
     if cash <= 0:
         return bankrupt()
