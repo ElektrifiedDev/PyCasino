@@ -74,7 +74,7 @@ def welcome():
 def game_select():
     while True:
         print(f"Here is a list of games available:\n{Fore.LIGHTBLACK_EX + "\n1. Coin Flipping\n2. Dice" + Style.RESET_ALL}")
-        userchoice = input("\nPlease enter the number corresponding to your game of choice, or Q to quit:   ")
+        userchoice = input("\nPlease enter the number corresponding to your game of choice, or Q to return to the main menu:   ")
 
         if userchoice == "1":
             clear_screen()
@@ -94,7 +94,7 @@ def game_select():
         elif userchoice.lower() == "q":
             save_game()
             clear_screen()
-            sys.exit()
+            return main_menu()
         else:
             print("That isn't a valid option!")
             input("Press Enter to continue...")
