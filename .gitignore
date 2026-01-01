@@ -1,0 +1,45 @@
+# Environment variables
+.env
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PyCharm / JetBrains
+*.iml
+
+# Wheels / dist files
+build/
+dist/
+*.egg-info/
+*.spec
+
+# Pipenv / Poetry
+Pipfile.lock
+poetry.lock
+
+# Local secrets or config
+config.json
+secret.json
+
+.releases/
