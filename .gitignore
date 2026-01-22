@@ -1,0 +1,34 @@
+# --- Python Internals ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+
+# --- PyInstaller (The Build Artifacts) ---
+build/
+dist/
+*.spec
+
+# --- Executables ---
+*.exe
+
+# --- IDE Settings ---
+.vscode/
+.idea/
+
+# --- OS Junk ---
+.DS_Store
+Thumbs.db
+
+# --- Environment Variables ---
+.env
+
+# --- Project Specific ---
+.pycasino_build/
+.pycasino_test/
+.releases/
