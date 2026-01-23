@@ -7,6 +7,47 @@
     <link rel="stylesheet" href="./assets/styles/styles.css">
 </head>
 <body>
+
+    <section id="menu-screen">
+        <header>
+            <h1>PyCasino</h1>
+        </header>
+
+        <div id="save-container">
+            <h2>Select a Save File</h2>
+            <div id="save-list">
+                <p>Loading saves...</p>
+            </div>
+            <button id="create-save-btn">New Game</button>
+        </div>
+    </section>
+
+    <main id="hub-screen" style="display: none;">
+        <nav>
+            <div class="stats">
+                Balance: $<span id="balance-val">0</span>
+            </div>
+            <button id="settings-btn">⚙️</button>
+        </nav>
+
+        <section class="game-selection">
+            <h2>The Casino Floor</h2>
+            <div class="game-grid">
+                <button class="game-card" onclick="loadGame('coinflip')">
+                    <h3>Coin Flip</h3>
+                </button>
+                <button class="game-card" onclick="loadGame('dice')">
+                    <h3>Dice Roll</h3>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <section id="game-viewport" style="display: none;">
+        <button id="back-to-hub">← Back to Lobby</button>
+        <iframe id="game-frame" src="" frameborder="0"></iframe>
+    </section>
+
     <script src="./assets/scripts/app.js"></script>
 </body>
 </html>

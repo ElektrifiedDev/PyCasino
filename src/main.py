@@ -52,34 +52,64 @@ def fetch_saves():
 
 def create_save_file():
     HARDWARE_ID = str(uuid.getnode())
-    DATETIME_NOW = datetime.now()
-    DATETIME_UNIX = str(datetime.now().timestamp()).replace('.', '')
+    now = datetime.now()
+    
+    # 1. Get timestamp with exactly 3 decimal places (milliseconds)
+    # This results in a string like "1737604359.123"
+    ts_str = f"{now.timestamp():.3f}"
+    
+    # 2. Remove the dot to get your "string of numbers"
+    # Result: "1737604359123"
+    DTN_UNIX = ts_str.replace('.', '')
+    
+    formatted_date = now.strftime("%Y-%m-%d %H:%M:%S")
     
     default_save = {
         "balance": 100,
         "datestamps": {
-            "last_played": str(DATETIME_NOW.strftime("%Y-%m-%d %H:%M:%S")),
-            "created_on": str(DATETIME_NOW.strftime("%Y-%m-%d %H:%M:%S"))
+            "last_played": formatted_date,
+            "created_on": formatted_date
         },
         "metadata" : {
             "HardwareID": HARDWARE_ID,
-            "DTN": DATETIME_UNIX,
+            "DTN": DTN_UNIX, # Now includes milliseconds safely
             "Hash" : None
         }
     }
 
-    default_save["metadata"]["Hash"] = hashlib.sha256((f'{str(default_save["balance"])}!{HARDWARE_ID}!{default_save["metadata"]["DTN"]}').encode()).hexdigest()
+    # Generate the hash using the exact same DTN_UNIX
+    hash_input = f'{default_save["balance"]}!{HARDWARE_ID}!{DTN_UNIX}'
+    default_save["metadata"]["Hash"] = hashlib.sha256(hash_input.encode()).hexdigest()
 
-    save_file_id = hashlib.sha256((HARDWARE_ID + DATETIME_UNIX).encode()).hexdigest()[:20]
-
+    # Generate filename
+    save_file_id = hashlib.sha256((HARDWARE_ID + DTN_UNIX).encode()).hexdigest()[:20]
     save_file_name = f'PyCasino_{save_file_id}.json'
+    
     SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, save_file_name)
     with open(SAVE_FILE_PATH, 'w') as f:
-        json.dump(default_save, f)
+        json.dump(default_save, f, indent=4)
+
+def verify_save(save_file):
+    SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, save_file)
+    with open(SAVE_FILE_PATH, 'r') as f:
+        save_data = json.load(f)
+        
+    HARDWARE_ID = str(uuid.getnode())
+    check_str = f'{str(save_data["balance"])}!{HARDWARE_ID}!{save_data["metadata"]["DTN"]}'
+    expected_hash = hashlib.sha256(check_str.encode()).hexdigest()
+    
+    is_valid = expected_hash == save_data["metadata"]["Hash"]
+
+    # Return a dictionary so JS can read "result.success" and "result.data"
+    return {
+        "success": is_valid,
+        "data": save_data if is_valid else None,
+        "message": "Verification successful" if is_valid else "Hash mismatch"
+    }
 
 def initialize_game():
     window = pywebview.create_window("PyCasino", UIPATH, width=800, height=600)
-    window.expose(fetch_saves, load_settings)
+    window.expose(fetch_saves, load_settings, create_save_file, verify_save)
     pywebview.start(gui='qt')
 
 if __name__ == "__main__":
