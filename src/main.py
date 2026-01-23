@@ -100,6 +100,8 @@ def verify_save(save_file):
     
     is_valid = expected_hash == save_data["metadata"]["Hash"]
 
+    global CURRENT_OPEN_SAVE
+    CURRENT_OPEN_SAVE = SAVE_FILE_PATH if is_valid else None
     # Return a dictionary so JS can read "result.success" and "result.data"
     return {
         "success": is_valid,
@@ -107,9 +109,47 @@ def verify_save(save_file):
         "message": "Verification successful" if is_valid else "Hash mismatch"
     }
 
+def play_coinflip(bet, choice):
+    # 1. Load the current active save (You'll need to track which file is open)
+    # For now, let's assume we track 'current_save_path' globally after selectSave
+    global CURRENT_OPEN_SAVE
+    if CURRENT_OPEN_SAVE is None:
+        return {"error": "No save file loaded"}
+    with open(CURRENT_OPEN_SAVE, 'r') as f:
+        data = json.load(f)
+
+    # 2. Logic
+    outcome = random.choice(['heads', 'tails'])
+    win = (choice == outcome)
+    
+    if win:
+        data["balance"] += bet
+    else:
+        data["balance"] -= bet
+
+    # 3. Update Metadata & RE-HASH
+    data["datestamps"]["last_played"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Use the same logic as create_save_file
+    HARDWARE_ID = data["metadata"]["HardwareID"]
+    DTN = data["metadata"]["DTN"]
+    
+    new_hash_input = f'{data["balance"]}!{HARDWARE_ID}!{DTN}'
+    data["metadata"]["Hash"] = hashlib.sha256(new_hash_input.encode()).hexdigest()
+
+    # 4. Save back to disk
+    with open(CURRENT_OPEN_SAVE, 'w') as f:
+        json.dump(data, f, indent=4)
+
+    return {
+        "win": win,
+        "outcome": outcome,
+        "new_balance": data["balance"]
+    }
+
 def initialize_game():
     window = pywebview.create_window("PyCasino", UIPATH, width=800, height=600)
-    window.expose(fetch_saves, load_settings, create_save_file, verify_save)
+    window.expose(fetch_saves, load_settings, create_save_file, verify_save, play_coinflip)
     pywebview.start(gui='qt')
 
 if __name__ == "__main__":
