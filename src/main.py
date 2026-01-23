@@ -53,16 +53,24 @@ def fetch_saves():
 def create_save_file():
     HARDWARE_ID = str(uuid.getnode())
     DATETIME_NOW = datetime.now()
+    DATETIME_UNIX = str(datetime.now().timestamp()).replace('.', '')
     
     default_save = {
         "balance": 100,
+        "datestamps": {
+            "last_played": str(DATETIME_NOW.strftime("%Y-%m-%d %H:%M:%S")),
+            "created_on": str(DATETIME_NOW.strftime("%Y-%m-%d %H:%M:%S"))
+        },
         "metadata" : {
             "HardwareID": HARDWARE_ID,
-            "DTN": str(DATETIME_NOW)
+            "DTN": DATETIME_UNIX,
+            "Hash" : None
         }
     }
 
-    save_file_id = hashlib.md5((HARDWARE_ID + str(DATETIME_NOW)).encode()).hexdigest()[::20]
+    default_save["metadata"]["Hash"] = hashlib.sha256((f'{str(default_save["balance"])}!{HARDWARE_ID}!{default_save["metadata"]["DTN"]}').encode()).hexdigest()
+
+    save_file_id = hashlib.sha256((HARDWARE_ID + DATETIME_UNIX).encode()).hexdigest()[:20]
 
     save_file_name = f'PyCasino_{save_file_id}.json'
     SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, save_file_name)
