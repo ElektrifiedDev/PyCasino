@@ -44,9 +44,6 @@ def fetch_saves():
     if not os.path.exists(SAVES_FOLDER_PATH):
         os.makedirs(SAVES_FOLDER_PATH)
 
-    if not os.listdir(SAVES_FOLDER_PATH):
-        create_save_file()
-
     save_files = [f for f in os.listdir(SAVES_FOLDER_PATH) if f.endswith('.json')]
     return save_files
 

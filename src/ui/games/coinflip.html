@@ -1,82 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Coin Flip</title>
-    <link rel="stylesheet" href="../assets/styles/styles.css">
-    <style>
-        /* Minimal internal styles for the coin animation */
-        #coin {
-            width: 100px;
-            height: 100px;
-            background: gold;
-            border-radius: 50%;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border: 5px solid goldenrod;
-            transition: transform 0.6s ease-in-out;
-        }
-        .flipping { transform: rotateX(1800deg); }
-    </style>
-</head>
-<body>
-    <div class="game-container">
-        <h2>Coin Flip</h2>
-        <p>Double your money or lose it all!</p>
-        
-        <div id="coin">HEADS</div>
-
-        <div class="controls">
-            <button onclick="flip('heads')">Bet on Heads</button>
-            <button onclick="flip('tails')">Bet on Tails</button>
-        </div>
-
-        <p id="status">Select a side to flip!</p>
+<div class="game-container">
+    <h2>Coin Flip</h2>
+    <div id="coin">HEADS</div>
+    <div class="controls">
+        <button onclick="flip('heads')">Heads</button>
+        <button onclick="flip('tails')">Tails</button>
     </div>
+    <p id="status"></p>
+</div>
 
-    <script>
-        async function flip(choice) {
-            const status = document.getElementById('status');
-            const coin = document.getElementById('coin');
-            
-            // 1. Get current balance from the parent index.html
-            // We use parent because app.js in index.html holds the state
-            let currentBalance = parseInt(parent.document.getElementById('balance-val').innerText);
-            let bet = 10; // You can make this an input later
+<script>
+    async function flip(choice) {
+        // Direct access to balance-val since we are in the same DOM
+        let currentBalance = parseInt(document.getElementById('balance-val').innerText);
+        let bet = 10;
 
-            if (currentBalance < bet) {
-                status.innerText = "Insufficient funds!";
-                return;
-            }
+        if (currentBalance < bet) return;
 
-            // Start animation
-            coin.classList.add('flipping');
-            status.innerText = "Flipping...";
-
-            // 2. Call Python to get the result (to prevent JS cheating)
-            // We'll create a new Python function called 'play_coinflip'
-            const result = await window.pywebview.api.play_coinflip(bet, choice);
-
-            setTimeout(() => {
-                coin.classList.remove('flipping');
-                coin.innerText = result.outcome.toUpperCase();
-                
-                if (result.win) {
-                    status.innerText = `You won $${bet}!`;
-                    status.style.color = "green";
-                } else {
-                    status.innerText = `You lost $${bet}.`;
-                    status.style.color = "red";
-                }
-
-                // 3. Update the UI balance in the parent window
-                parent.document.getElementById('balance-val').innerText = result.new_balance;
-            }, 600);
-        }
-    </script>
-</body>
-</html>
+        const result = await window.pywebview.api.play_coinflip(bet, choice);
+        
+        // Update the global balance display directly
+        document.getElementById('balance-val').innerText = result.new_balance;
+        document.getElementById('status').innerText = result.win ? "WINNER!" : "LOST";
+        document.getElementById('coin').innerText = result.outcome.toUpperCase();
+    }
+</script>

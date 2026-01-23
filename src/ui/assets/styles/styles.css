@@ -149,3 +149,20 @@ button {
 button:hover {
     opacity: 0.9;
 }
+
+/* Hide all screens by default */
+.app-screen {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Only show the screen with the .active class */
+.app-screen.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

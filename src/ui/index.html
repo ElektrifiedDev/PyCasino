@@ -4,51 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyCasino</title>
-    <link rel="stylesheet" href="../assets/styles/styles.css">
+    <link rel="stylesheet" href="./assets/styles/styles.css">
 </head>
 <body>
-
-    <section id="menu-screen">
-        <header>
-            <h1>PyCasino</h1>
-        </header>
-
+    <section id="menu-screen" class="app-screen active">
+        <h1>PyCasino</h1>
         <div id="save-container">
-            <h2>Select a Save File</h2>
-            <div id="save-list">
-                <p>Loading saves...</p>
-            </div>
+            <div id="save-list"></div>
             <button id="create-save-btn">New Game</button>
         </div>
     </section>
 
-    <main id="hub-screen" style="display: none;">
+    <section id="hub-screen" class="app-screen">
         <nav>
-            <div class="stats">
-                Balance: $<span id="balance-val">0</span>
-            </div>
-            <button id="settings-btn">⚙️</button>
+            <div class="stats">Balance: $<span id="balance-val">0</span></div>
+            <button id="logout-btn">Logout</button>
         </nav>
-
-        <section class="game-selection">
-            <h2>The Casino Floor</h2>
-            <div class="game-grid">
-                <button class="game-card" onclick="loadGame('coinflip')">
-                    <h3>Coin Flip</h3>
-                </button>
-                <button class="game-card" onclick="loadGame('dice')">
-                    <h3>Dice Roll</h3>
-                </button>
-            </div>
-        </section>
-    </main>
-
-    <section id="game-viewport" style="display: none;">
-        <iframe id="game-frame" src="" frameborder="0"></iframe>
-        <br>
-        <button id="back-to-hub">← Back to Lobby</button>
+        <div class="game-grid">
+            <button class="game-card" onclick="loadGame('coinflip')">Coin Flip</button>
+            <button class="game-card" onclick="loadGame('dice')">Dice Roll</button>
+        </div>
     </section>
 
-    <script src="../assets/scripts/app.js"></script>
+    <section id="game-viewport" class="app-screen">
+        <button id="close-game-btn">← Back to Lobby</button>
+        <div id="game-content">
+            </div>
+    </section>
+
+    <script src="./assets/scripts/app.js"></script>
 </body>
 </html>
